@@ -16,12 +16,16 @@ class WeatherCollectionViewController: UIViewController {
     var fetchedResultsController: NSFetchedResultsController<Weather> = NSFetchedResultsController()
     
     //MARK: - UIControls
+    var collectionVIew: UICollectionView! = nil
+    //var pageControl: UIPageControl! = nil
+    //var toolbar: UIToolbar! = nil
+    //var refreshControl: UIRefreshControl! = nil
     
     //MARK: - Actions
-
-
     
-
+    
+    
+    
     // MARK: View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,7 +36,22 @@ class WeatherCollectionViewController: UIViewController {
 // MARK: Private
 private extension WeatherCollectionViewController {
     func configureView() {
+        setupCollectionView()
         fetchedResultsController = weatherListFetchedResultsController()
+    }
+    
+    func setupCollectionView() {
+        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        layout.itemSize = CGSize(width: view.frame.width, height: view.frame.height)
+        layout.scrollDirection = .horizontal
+        collectionVIew = UICollectionView(frame: view.frame, collectionViewLayout: layout)
+        collectionVIew.delegate = self
+        collectionVIew.dataSource = self
+        collectionVIew.backgroundColor = .cyan
+        collectionVIew.register(WeatherCell.self, forCellWithReuseIdentifier: "WeatherCell")
+        collectionVIew.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(collectionVIew)
     }
 }
 
@@ -43,16 +62,16 @@ private extension WeatherCollectionViewController {
     func weatherListFetchedResultsController() -> NSFetchedResultsController<Weather> {
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: allWeathersFetchRequest(),
-                                                              managedObjectContext: coreDataStack.managedContext,
-                                                              sectionNameKeyPath: #keyPath(Weather.isCurrentLocation),
-                                                              cacheName: nil)
+                                                                  managedObjectContext: coreDataStack.managedContext,
+                                                                  sectionNameKeyPath: #keyPath(Weather.isCurrentLocation),
+                                                                  cacheName: nil)
         
         fetchedResultsController.delegate = self
         
         do {
-          try fetchedResultsController.performFetch()
+            try fetchedResultsController.performFetch()
         } catch let error as NSError {
-          fatalError("Error: \(error.localizedDescription)")
+            fatalError("Error: \(error.localizedDescription)")
         }
         
         return fetchedResultsController
@@ -75,8 +94,27 @@ extension WeatherCollectionViewController: NSFetchedResultsControllerDelegate {
 }
 
 // MARK: UICollectionViewDataSource
-extension WeatherCollectionViewController: UICollectionViewDelegate {
+extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return fetchedResultsController.sections?.count ?? 0
+    }
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        guard let sectionInfo = fetchedResultsController.sections?[section] else { return 0 }
+        return sectionInfo.numberOfObjects
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WeatherCell", for: indexPath) as! WeatherCell
+        configureCell(cell, indexPath: indexPath)
+        return cell
+    }
+    
+    
+    private func configureCell(_ cell: WeatherCell, indexPath: IndexPath) {
+        let weather = fetchedResultsController.object(at: indexPath)
+        cell.cityNameLabel.text = "test"
+    }
 }
 
 

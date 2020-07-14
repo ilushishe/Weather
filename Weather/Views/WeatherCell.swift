@@ -10,6 +10,7 @@ import UIKit
 
 class WeatherCell: UICollectionViewCell {
     
+    //MARK: - Properties
     var cityNameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 36)
@@ -66,6 +67,8 @@ class WeatherCell: UICollectionViewCell {
         return label
     }()
     
+    
+    //MARK:_ Methods
     override init(frame: CGRect) {
         super.init(frame: frame)
         //backgroundColor = .orange
@@ -78,7 +81,6 @@ class WeatherCell: UICollectionViewCell {
     
     func addViewsAndSetConstraints() {
     
-        
         addSubview(cityNameLabel)
         cityNameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 40).isActive = true
         cityNameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 0).isActive = true

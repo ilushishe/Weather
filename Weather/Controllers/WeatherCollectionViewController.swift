@@ -12,7 +12,7 @@ import CoreData
 class WeatherCollectionViewController: UIViewController {
     
     //MARK: - Properties
-    var coreDataStack: CoreDataStack!
+    lazy var  coreDataStack = CoreDataStack(modelName: "Weathers")
     var fetchedResultsController: NSFetchedResultsController<Weather> = NSFetchedResultsController()
     
     //MARK: - UIControls
@@ -25,6 +25,7 @@ class WeatherCollectionViewController: UIViewController {
     // MARK: View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureView()
     }
 }
 

@@ -54,7 +54,6 @@ private extension WeatherCollectionViewController {
     func configureView() {
         fetchedResultsController = weatherListFetchedResultsController()
         setupLocationManager()
-        locationManager?.requestLocation()
         setupCollectionView()
         //setupToolbar()
     }
@@ -160,15 +159,45 @@ extension WeatherCollectionViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let location = locations.first {
-            print("Found user's location: \(location)")
-        } else {
-            print("Location isn't found")
-        }
+        print("LocationManager did update location")
+        fetchDataForCurrentLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Failed to find user's location: \(error.localizedDescription)")
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        locationManager?.requestLocation()
+        print("location manager authorization status changed")
+        
+        switch status {
+        case .authorizedAlways:
+            print("user allow app to get location data when app is active or in background")
+        case .authorizedWhenInUse:
+            print("user allow app to get location data only when app is active")
+        case .denied:
+            print("user tap 'disallow' on the permission dialog, cant get location data")
+            fetchDataForCurrentLocation()
+        case .restricted:
+            print("parental control setting disallow location data")
+            fetchDataForCurrentLocation()
+        case .notDetermined:
+            print("the location permission dialog haven't shown before, user haven't tap allow/disallow")
+        @unknown default:
+            print("new status found")
+        }
+    }
+}
+
+//MARK: Network services
+extension WeatherCollectionViewController {
+    func fetchDataForCurrentLocation() {
+        if let location = locationManager?.location {
+            print("is ON")
+        } else {
+            print("is OFF")
+        }
     }
 }
 

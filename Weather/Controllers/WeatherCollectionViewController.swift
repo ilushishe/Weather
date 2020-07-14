@@ -12,6 +12,8 @@ import CoreData
 class WeatherCollectionViewController: UIViewController {
     
     //MARK: - Properties
+    var coreDataStack: CoreDataStack!
+    var fetchedResultsController: NSFetchedResultsController<Weather> = NSFetchedResultsController()
     
     //MARK: - UIControls
     
@@ -29,7 +31,7 @@ class WeatherCollectionViewController: UIViewController {
 // MARK: Private
 private extension WeatherCollectionViewController {
     func configureView() {
-        
+        fetchedResultsController = weatherListFetchedResultsController()
     }
 }
 
@@ -37,6 +39,33 @@ private extension WeatherCollectionViewController {
 // MARK: NSFetchedResultsController
 private extension WeatherCollectionViewController {
     
+    func weatherListFetchedResultsController() -> NSFetchedResultsController<Weather> {
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: allWeathersFetchRequest(),
+                                                              managedObjectContext: coreDataStack.managedContext,
+                                                              sectionNameKeyPath: #keyPath(Weather.isCurrentLocation),
+                                                              cacheName: nil)
+        
+        fetchedResultsController.delegate = self
+        
+        do {
+          try fetchedResultsController.performFetch()
+        } catch let error as NSError {
+          fatalError("Error: \(error.localizedDescription)")
+        }
+        
+        return fetchedResultsController
+    }
+    
+    func allWeathersFetchRequest() -> NSFetchRequest<Weather> {
+        
+        let fetchRequest: NSFetchRequest<Weather> = Weather.fetchRequest()
+        let currentLocationSort = NSSortDescriptor(key: #keyPath(Weather.isCurrentLocation), ascending: false)
+        let indexSort = NSSortDescriptor(key: #keyPath(Weather.index), ascending: true)
+        fetchRequest.sortDescriptors = [currentLocationSort, indexSort]
+        
+        return fetchRequest
+    }
 }
 
 // MARK: NSFetchedResultsControllerDelegate

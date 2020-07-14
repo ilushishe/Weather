@@ -195,8 +195,57 @@ extension WeatherCollectionViewController {
     func fetchDataForCurrentLocation() {
         if let location = locationManager?.location {
             print("is ON")
+            let lat = String(format: "%.2f", location.coordinate.latitude)
+            let lon = String(format: "%.2f", location.coordinate.longitude)
+            print(lat, lon)
         } else {
             print("is OFF")
+        }
+    }
+    
+    func fetchFromServer(q: String, isCurrent: Bool) {
+        let apikey = "9d30d2d76ab040a1872223526201905"
+        
+        let session = URLSession.shared
+        let url = URL(string: "https://api.weatherapi.com/v1/current.json?key=\(apikey)&q=\(q)")!
+        let task = session.dataTask(with: url) {
+            data, response, error in
+            if error != nil {
+                print("что-то пошло не так алет")
+                return
+            }
+            
+            guard let response = response as? HTTPURLResponse, (200...299).contains(response.statusCode) else {
+                print("Server error! алерт")
+                return
+            }
+            
+            if let data = data {
+                self.parseWeather(data, isCurrent)
+            } else {
+                print("Что-то пошло не так")
+            }
+        }
+        task.resume()
+        print("Данные загрузились")
+    }
+    
+    private func parseWeather(_ data: Data, _ isCurrent: Bool) {
+        do {
+            let jsonArray = try JSONSerialization.jsonObject(with: data, options: [.allowFragments]) as! [[String: Any]]
+            
+            
+            coreDataStack.saveContext()
+            print("Imported \(jsonArray.count) teams")
+            
+        } catch let error as NSError {
+            print("Error importing teams: \(error)")
+        }
+        
+        if isCurrent {
+            
+        } else {
+            
         }
     }
 }

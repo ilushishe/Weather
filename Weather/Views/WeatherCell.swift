@@ -19,8 +19,6 @@ class WeatherCell: UICollectionViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         label.textAlignment = .center
-        //label.backgroundColor = .green
-
         return label
     }()
     
@@ -28,10 +26,9 @@ class WeatherCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 106)
         label.textColor = .black
-        label.text = "225"
+        label.text = "-/-"
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
-        //label.backgroundColor = .magenta
         return label
     }()
     
@@ -39,15 +36,13 @@ class WeatherCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 18)
         label.textColor = .black
-        label.text = "Feels like: 25"
+        label.text = "Feels like: -/-"
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
-        //label.backgroundColor = .magenta
         return label
     }()
     
     var weatherIcon: UIImageView = {
-        //let image = UIImage(named: " ")
         let icon = UIImageView()
         icon.translatesAutoresizingMaskIntoConstraints = false
         icon.contentMode = .scaleAspectFill
@@ -60,10 +55,9 @@ class WeatherCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 18)
         label.textColor = .black
-        label.text = "Weather description"
+        label.text = "-/-"
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
-        //label.backgroundColor = .systemPink
         return label
     }()
     
@@ -71,7 +65,6 @@ class WeatherCell: UICollectionViewCell {
     //MARK:_ Methods
     override init(frame: CGRect) {
         super.init(frame: frame)
-        //backgroundColor = .orange
         addViewsAndSetConstraints()
     }
     

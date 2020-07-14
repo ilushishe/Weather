@@ -2,7 +2,7 @@
 //  Weather+CoreDataClass.swift
 //  Weather
 //
-//  Created by Ilya Kozlov on 2020-07-13.
+//  Created by Ilya Kozlov on 2020-07-14.
 //  Copyright © 2020 ilushishe. All rights reserved.
 //
 //

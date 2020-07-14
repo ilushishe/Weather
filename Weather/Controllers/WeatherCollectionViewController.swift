@@ -18,11 +18,24 @@ class WeatherCollectionViewController: UIViewController {
     //MARK: - UIControls
     var collectionVIew: UICollectionView! = nil
     //var pageControl: UIPageControl! = nil
-    //var toolbar: UIToolbar! = nil
+    var toolbar: UIToolbar! = nil
     //var refreshControl: UIRefreshControl! = nil
     
     //MARK: - Actions
-    
+    @objc func addWeather() {
+        print("WeatherAdded")
+        let weatherInCurrentLocation = Weather(context: self.coreDataStack.managedContext)
+        weatherInCurrentLocation.isCurrentLocation = true
+        weatherInCurrentLocation.cityName = "CurrentLocation"
+        weatherInCurrentLocation.lat = 45.5
+        weatherInCurrentLocation.lon = -73.58
+        
+        let weatherManualy = Weather(context: self.coreDataStack.managedContext)
+        weatherManualy.isCurrentLocation = false
+        weatherManualy.cityName = "ManualyWeather"
+        coreDataStack.saveContext()
+        
+    }
     
     
     
@@ -37,6 +50,7 @@ class WeatherCollectionViewController: UIViewController {
 private extension WeatherCollectionViewController {
     func configureView() {
         setupCollectionView()
+        setupToolbar()
         fetchedResultsController = weatherListFetchedResultsController()
     }
     
@@ -46,12 +60,26 @@ private extension WeatherCollectionViewController {
         layout.itemSize = CGSize(width: view.frame.width, height: view.frame.height)
         layout.scrollDirection = .horizontal
         collectionVIew = UICollectionView(frame: view.frame, collectionViewLayout: layout)
+        collectionVIew.backgroundColor = .white
         collectionVIew.delegate = self
         collectionVIew.dataSource = self
-        collectionVIew.backgroundColor = .cyan
         collectionVIew.register(WeatherCell.self, forCellWithReuseIdentifier: "WeatherCell")
         collectionVIew.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(collectionVIew)
+    }
+    
+    func setupToolbar() {
+        toolbar = UIToolbar()
+        view.addSubview(toolbar)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
+        //toolbar.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        toolbar.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
+        toolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
+        //toolbar.backgroundColor = .black
+        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(addWeather))
+        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let listItem = UIBarButtonItem(barButtonSystemItem: .organize, target: nil, action: nil)
+        toolbar.setItems([addButton,space, listItem], animated: true)
     }
 }
 
@@ -99,6 +127,7 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return fetchedResultsController.sections?.count ?? 0
     }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let sectionInfo = fetchedResultsController.sections?[section] else { return 0 }
         return sectionInfo.numberOfObjects
@@ -113,7 +142,7 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
     
     private func configureCell(_ cell: WeatherCell, indexPath: IndexPath) {
         let weather = fetchedResultsController.object(at: indexPath)
-        cell.cityNameLabel.text = "test"
+        cell.cityNameLabel.text = weather.cityName
     }
 }
 

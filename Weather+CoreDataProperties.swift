@@ -2,7 +2,7 @@
 //  Weather+CoreDataProperties.swift
 //  Weather
 //
-//  Created by Ilya Kozlov on 2020-07-13.
+//  Created by Ilya Kozlov on 2020-07-14.
 //  Copyright © 2020 ilushishe. All rights reserved.
 //
 //
@@ -27,5 +27,7 @@ extension Weather {
     @NSManaged public var feels_c: Float
     @NSManaged public var feels_f: Float
     @NSManaged public var last_updated: Date?
+    @NSManaged public var lat: Double
+    @NSManaged public var lon: Double
 
 }

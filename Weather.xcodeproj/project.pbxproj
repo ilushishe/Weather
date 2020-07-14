@@ -16,6 +16,7 @@
 		E8A756C824BD281E00AA224D /* Weather+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A756C624BD281E00AA224D /* Weather+CoreDataClass.swift */; };
 		E8A756C924BD281E00AA224D /* Weather+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A756C724BD281E00AA224D /* Weather+CoreDataProperties.swift */; };
 		E8A756CE24BDD9D100AA224D /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A756CD24BDD9D100AA224D /* CoreDataStack.swift */; };
+		E8A756D024BDE01100AA224D /* WeatherCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A756CF24BDE01100AA224D /* WeatherCollectionViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		E8A756C624BD281E00AA224D /* Weather+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Weather+CoreDataClass.swift"; path = "Weather/Model/Weather+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		E8A756C724BD281E00AA224D /* Weather+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Weather+CoreDataProperties.swift"; path = "Weather/Model/Weather+CoreDataProperties.swift"; sourceTree = SOURCE_ROOT; };
 		E8A756CD24BDD9D100AA224D /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
+		E8A756CF24BDE01100AA224D /* WeatherCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCollectionViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 		E8A756CB24BDD93300AA224D /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				E8A756CF24BDE01100AA224D /* WeatherCollectionViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -177,6 +180,7 @@
 				E8A756CE24BDD9D100AA224D /* CoreDataStack.swift in Sources */,
 				E8A756B024BD267C00AA224D /* AppDelegate.swift in Sources */,
 				E8A756B224BD267C00AA224D /* SceneDelegate.swift in Sources */,
+				E8A756D024BDE01100AA224D /* WeatherCollectionViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

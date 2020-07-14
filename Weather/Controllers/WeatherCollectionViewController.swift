@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import CoreLocation
 
 class WeatherCollectionViewController: UIViewController {
     
@@ -15,11 +16,13 @@ class WeatherCollectionViewController: UIViewController {
     lazy var  coreDataStack = CoreDataStack(modelName: "Weathers")
     var fetchedResultsController: NSFetchedResultsController<Weather> = NSFetchedResultsController()
     
+    var locationManager: CLLocationManager?
+    var currentLocation: CLLocation?
+    
     //MARK: - UIControls
     var collectionVIew: UICollectionView! = nil
     //var pageControl: UIPageControl! = nil
     var toolbar: UIToolbar! = nil
-    //var refreshControl: UIRefreshControl! = nil
     
     //MARK: - Actions
     @objc func addWeather() {
@@ -49,9 +52,11 @@ class WeatherCollectionViewController: UIViewController {
 // MARK: Private
 private extension WeatherCollectionViewController {
     func configureView() {
-        setupCollectionView()
-        setupToolbar()
         fetchedResultsController = weatherListFetchedResultsController()
+        setupLocationManager()
+        locationManager?.requestLocation()
+        setupCollectionView()
+        //setupToolbar()
     }
     
     func setupCollectionView() {
@@ -143,6 +148,27 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
     private func configureCell(_ cell: WeatherCell, indexPath: IndexPath) {
         let weather = fetchedResultsController.object(at: indexPath)
         cell.cityNameLabel.text = weather.cityName
+    }
+}
+
+//MARK: Location services
+extension WeatherCollectionViewController: CLLocationManagerDelegate {
+    func setupLocationManager() {
+        locationManager = CLLocationManager()
+        locationManager?.delegate = self
+        locationManager?.requestWhenInUseAuthorization()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            print("Found user's location: \(location)")
+        } else {
+            print("Location isn't found")
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Failed to find user's location: \(error.localizedDescription)")
     }
 }
 

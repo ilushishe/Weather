@@ -27,11 +27,6 @@ class WeatherCollectionViewController: UIViewController {
     //MARK: - Actions
     @objc func addWeather() {
         print("WeatherAdded")
-        let weatherInCurrentLocation = Weather(context: self.coreDataStack.managedContext)
-        weatherInCurrentLocation.isCurrentLocation = true
-        weatherInCurrentLocation.cityName = "CurrentLocation"
-        weatherInCurrentLocation.lat = 45.5
-        weatherInCurrentLocation.lon = -73.58
         
         let weatherManualy = Weather(context: self.coreDataStack.managedContext)
         weatherManualy.isCurrentLocation = false
@@ -55,7 +50,7 @@ private extension WeatherCollectionViewController {
         fetchedResultsController = weatherListFetchedResultsController()
         setupLocationManager()
         setupCollectionView()
-        //setupToolbar()
+//        setupToolbar()
     }
     
     func setupCollectionView() {
@@ -118,11 +113,29 @@ private extension WeatherCollectionViewController {
         
         return fetchRequest
     }
+    
+    func currentLocationFetchRequest() -> NSFetchRequest<Weather> {
+        let fetchRequest: NSFetchRequest<Weather> = Weather.fetchRequest()
+        let predicate = NSPredicate(format: "isCurrentLocation == YES")
+        fetchRequest.predicate = predicate
+        return fetchRequest
+    }
+    
+    func manualAddedWeatherFetchRequest(name: String) -> NSFetchRequest<Weather> {
+        let fetchRequest: NSFetchRequest<Weather> = Weather.fetchRequest()
+        let predicate1 = NSPredicate(format: "name == %@", name)
+        let predicate2 = NSPredicate(format: "isCurrentLocation == NO")
+        let bigPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [predicate1,predicate2])
+        fetchRequest.predicate = bigPredicate
+        return fetchRequest
+    }
 }
 
 // MARK: NSFetchedResultsControllerDelegate
 extension WeatherCollectionViewController: NSFetchedResultsControllerDelegate {
-    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        collectionVIew.reloadData()
+    }
 }
 
 // MARK: UICollectionViewDataSource
@@ -197,11 +210,14 @@ extension WeatherCollectionViewController {
             print("is ON")
             let lat = String(format: "%.2f", location.coordinate.latitude)
             let lon = String(format: "%.2f", location.coordinate.longitude)
-            print(lat, lon)
+            let q = "\(lat),\(lon)"
+            fetchFromServer(q: q, isCurrent: true)
         } else {
             print("is OFF")
         }
     }
+    
+    // ЭТО БЕЗОБРАЗИЕ НУЖНО ПЕРЕПИСАТЬ
     
     func fetchFromServer(q: String, isCurrent: Bool) {
         let apikey = "9d30d2d76ab040a1872223526201905"
@@ -230,22 +246,38 @@ extension WeatherCollectionViewController {
         print("Данные загрузились")
     }
     
+    // И ЭТО, УЖОС
     private func parseWeather(_ data: Data, _ isCurrent: Bool) {
         do {
-            let jsonArray = try JSONSerialization.jsonObject(with: data, options: [.allowFragments]) as! [[String: Any]]
-            
-            
-            coreDataStack.saveContext()
-            print("Imported \(jsonArray.count) teams")
+            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                if let locationObject = json["location"] as? [String: Any], let currentObject = json["current"] as? [String: Any] {
+                    print(locationObject)
+                    print(currentObject)
+                    if let cityName = locationObject["name"] as? String {
+                        print("Распарсили")
+                        let updFetchRequest: NSFetchRequest<Weather>
+                        if isCurrent {
+                            updFetchRequest = currentLocationFetchRequest()
+                        } else {
+                            updFetchRequest = manualAddedWeatherFetchRequest(name: cityName)
+                        }
+                        if let weathers = try? self.coreDataStack.managedContext.fetch(updFetchRequest) {
+                            if weathers.count > 0 {
+                                weathers[0].cityName = cityName
+                                weathers[0].isCurrentLocation = isCurrent
+                            } else {
+                                let weather = Weather(context: coreDataStack.managedContext)
+                                weather.cityName = cityName
+                                weather.isCurrentLocation = isCurrent
+                            }
+                        }
+                        coreDataStack.saveContext()
+                    }
+                }
+            }
             
         } catch let error as NSError {
-            print("Error importing teams: \(error)")
-        }
-        
-        if isCurrent {
-            
-        } else {
-            
+            print("Error parsing weather: \(error)")
         }
     }
 }

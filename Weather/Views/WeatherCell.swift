@@ -15,7 +15,7 @@ class WeatherCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 36)
         label.textColor = .black
-        label.text = " "
+        label.text = "-/-"
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         label.textAlignment = .center

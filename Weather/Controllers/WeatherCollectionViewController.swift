@@ -27,10 +27,9 @@ class WeatherCollectionViewController: UIViewController {
     //MARK: - Actions
     @objc func addWeather() {
         print("WeatherAdded")
-        
         let weatherManualy = Weather(context: self.coreDataStack.managedContext)
         weatherManualy.isCurrentLocation = false
-        weatherManualy.cityName = "ManualyWeather"
+        weatherManualy.cityName = "Samara"
         coreDataStack.saveContext()
         
     }
@@ -41,6 +40,7 @@ class WeatherCollectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
+        updManualLocations()
     }
 }
 
@@ -50,7 +50,7 @@ private extension WeatherCollectionViewController {
         fetchedResultsController = weatherListFetchedResultsController()
         setupLocationManager()
         setupCollectionView()
-//        setupToolbar()
+        setupToolbar()
     }
     
     func setupCollectionView() {
@@ -71,10 +71,9 @@ private extension WeatherCollectionViewController {
         toolbar = UIToolbar()
         view.addSubview(toolbar)
         toolbar.translatesAutoresizingMaskIntoConstraints = false
-        //toolbar.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        toolbar.heightAnchor.constraint(equalToConstant: 40).isActive = true
         toolbar.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
         toolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
-        //toolbar.backgroundColor = .black
         let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(addWeather))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let listItem = UIBarButtonItem(barButtonSystemItem: .organize, target: nil, action: nil)
@@ -121,12 +120,10 @@ private extension WeatherCollectionViewController {
         return fetchRequest
     }
     
-    func manualAddedWeatherFetchRequest(name: String) -> NSFetchRequest<Weather> {
+    func manualAddedWeatherFetchRequest() -> NSFetchRequest<Weather> {
         let fetchRequest: NSFetchRequest<Weather> = Weather.fetchRequest()
-        let predicate1 = NSPredicate(format: "name == %@", name)
-        let predicate2 = NSPredicate(format: "isCurrentLocation == NO")
-        let bigPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [predicate1,predicate2])
-        fetchRequest.predicate = bigPredicate
+        let predicate = NSPredicate(format: "isCurrentLocation == NO")
+        fetchRequest.predicate = predicate
         return fetchRequest
     }
 }
@@ -159,7 +156,11 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
     
     private func configureCell(_ cell: WeatherCell, indexPath: IndexPath) {
         let weather = fetchedResultsController.object(at: indexPath)
-        cell.cityNameLabel.text = weather.cityName
+        if let name = weather.cityName {
+            cell.cityNameLabel.text = name
+            cell.tempLabel.text = String(weather.temp_c)
+        }
+      
     }
 }
 
@@ -169,11 +170,12 @@ extension WeatherCollectionViewController: CLLocationManagerDelegate {
         locationManager = CLLocationManager()
         locationManager?.delegate = self
         locationManager?.requestWhenInUseAuthorization()
+        locationManager?.requestLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         print("LocationManager did update location")
-        fetchDataForCurrentLocation()
+        updCurrentLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -181,7 +183,6 @@ extension WeatherCollectionViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        locationManager?.requestLocation()
         print("location manager authorization status changed")
         
         switch status {
@@ -191,10 +192,8 @@ extension WeatherCollectionViewController: CLLocationManagerDelegate {
             print("user allow app to get location data only when app is active")
         case .denied:
             print("user tap 'disallow' on the permission dialog, cant get location data")
-            fetchDataForCurrentLocation()
         case .restricted:
             print("parental control setting disallow location data")
-            fetchDataForCurrentLocation()
         case .notDetermined:
             print("the location permission dialog haven't shown before, user haven't tap allow/disallow")
         @unknown default:
@@ -205,26 +204,42 @@ extension WeatherCollectionViewController: CLLocationManagerDelegate {
 
 //MARK: Network services
 extension WeatherCollectionViewController {
-    func fetchDataForCurrentLocation() {
-        if let location = locationManager?.location {
-            print("is ON")
-            let lat = String(format: "%.2f", location.coordinate.latitude)
-            let lon = String(format: "%.2f", location.coordinate.longitude)
-            let q = "\(lat),\(lon)"
-            fetchFromServer(q: q, isCurrent: true)
-        } else {
-            print("is OFF")
+    
+    //Переписать на удаление?
+    func updCurrentLocation() {
+        if let currentWeather = try? coreDataStack.managedContext.fetch(currentLocationFetchRequest()), let coordinates = locationManager?.location?.coordinate {
+            //Так нельзя
+            var weather: Weather?
+            if currentWeather.count > 0 {
+                weather = currentWeather[0]
+            } else {
+                weather = Weather(context: coreDataStack.managedContext)
+            }
+            
+            if let weather = weather {
+                weather.lat = Double(coordinates.latitude)
+                weather.lon = Double(coordinates.longitude)
+                weather.isCurrentLocation = true
+                updWeatherFromServer(query: "\(weather.lat),\(weather.lon)", weather: weather)
+            }
         }
     }
     
-    // ЭТО БЕЗОБРАЗИЕ НУЖНО ПЕРЕПИСАТЬ
+    func updManualLocations() {
+        if let weathers = fetchedResultsController.fetchedObjects {
+            for weather in weathers {
+                if !weather.isCurrentLocation {
+                    updWeatherFromServer(query: weather.cityName ?? "", weather: weather)
+                }
+            }
+        }
+    }
     
-    func fetchFromServer(q: String, isCurrent: Bool) {
+    func updWeatherFromServer (query: String, weather: Weather) {
         let apikey = "9d30d2d76ab040a1872223526201905"
-        
         let session = URLSession.shared
-        let url = URL(string: "https://api.weatherapi.com/v1/current.json?key=\(apikey)&q=\(q)")!
-        let task = session.dataTask(with: url) {
+        guard let url = URL(string: "https://api.weatherapi.com/v1/current.json?key=\(apikey)&q=\(query)") else { return }
+        let task = session.dataTask(with: url) { [weak self]
             data, response, error in
             if error != nil {
                 print("что-то пошло не так алет")
@@ -237,49 +252,39 @@ extension WeatherCollectionViewController {
             }
             
             if let data = data {
-                self.parseWeather(data, isCurrent)
+                if self?.parseWeatherData(data: data, weather: weather) ?? false {
+                    self?.coreDataStack.saveContext()
+                }
             } else {
                 print("Что-то пошло не так")
             }
         }
         task.resume()
-        print("Данные загрузились")
+        print("Данные загружены")
     }
     
-    // И ЭТО, УЖОС
-    private func parseWeather(_ data: Data, _ isCurrent: Bool) {
+    func parseWeatherData(data: Data, weather: Weather) -> Bool {
         do {
             if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                 if let locationObject = json["location"] as? [String: Any], let currentObject = json["current"] as? [String: Any] {
-                    print(locationObject)
-                    print(currentObject)
-                    if let cityName = locationObject["name"] as? String {
-                        print("Распарсили")
-                        let updFetchRequest: NSFetchRequest<Weather>
-                        if isCurrent {
-                            updFetchRequest = currentLocationFetchRequest()
-                        } else {
-                            updFetchRequest = manualAddedWeatherFetchRequest(name: cityName)
-                        }
-                        if let weathers = try? self.coreDataStack.managedContext.fetch(updFetchRequest) {
-                            if weathers.count > 0 {
-                                weathers[0].cityName = cityName
-                                weathers[0].isCurrentLocation = isCurrent
-                            } else {
-                                let weather = Weather(context: coreDataStack.managedContext)
-                                weather.cityName = cityName
-                                weather.isCurrentLocation = isCurrent
-                            }
-                        }
-                        coreDataStack.saveContext()
+                    if let cityName = locationObject["name"] as? String{
+                        print("Распарсили name")
+                        weather.cityName = cityName
                     }
+                    
+                    if let temp = currentObject["temp_c"] as? Float {
+                        weather.temp_c = temp
+                        print("распарсили temp")
+                    }
+                    return true
                 }
             }
-            
         } catch let error as NSError {
             print("Error parsing weather: \(error)")
         }
+        return false
     }
 }
+
 
 

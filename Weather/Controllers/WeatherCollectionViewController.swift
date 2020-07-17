@@ -20,21 +20,16 @@ class WeatherCollectionViewController: UIViewController {
     var currentLocation: CLLocation?
     
     //MARK: - UIControls
+    //как-то надо переделать
     var collectionVIew: UICollectionView! = nil
     //var pageControl: UIPageControl! = nil
     var toolbar: UIToolbar! = nil
     
     //MARK: - Actions
-    @objc func addWeather() {
-        print("WeatherAdded")
-        let weatherManualy = Weather(context: self.coreDataStack.managedContext)
-        weatherManualy.isCurrentLocation = false
-        weatherManualy.cityName = "Samara"
-        coreDataStack.saveContext()
-        
+    @objc func openCitiesList() {
+        let listOfCitiesVC = ListOfCities()
+        navigationController?.showDetailViewController(listOfCitiesVC, sender: self)
     }
-    
-    
     
     // MARK: View Lifecycle
     override func viewDidLoad() {
@@ -47,6 +42,7 @@ class WeatherCollectionViewController: UIViewController {
 // MARK: Private
 private extension WeatherCollectionViewController {
     func configureView() {
+        navigationController?.setNavigationBarHidden(true, animated: false)
         fetchedResultsController = weatherListFetchedResultsController()
         setupLocationManager()
         setupCollectionView()
@@ -74,7 +70,7 @@ private extension WeatherCollectionViewController {
         toolbar.heightAnchor.constraint(equalToConstant: 40).isActive = true
         toolbar.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
         toolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
-        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(addWeather))
+        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(openCitiesList))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let listItem = UIBarButtonItem(barButtonSystemItem: .organize, target: nil, action: nil)
         toolbar.setItems([addButton,space, listItem], animated: true)
@@ -131,6 +127,7 @@ private extension WeatherCollectionViewController {
 // MARK: NSFetchedResultsControllerDelegate
 extension WeatherCollectionViewController: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        // TODO: переделать ? или норм?
         collectionVIew.reloadData()
     }
 }
@@ -202,10 +199,10 @@ extension WeatherCollectionViewController: CLLocationManagerDelegate {
     }
 }
 
+//ПОКА РАБОТАЕТ, НО ПОТОМ НАДО ПЕРЕПИСАТЬ
 //MARK: Network services
 extension WeatherCollectionViewController {
     
-    //Переписать на удаление?
     func updCurrentLocation() {
         if let currentWeather = try? coreDataStack.managedContext.fetch(currentLocationFetchRequest()), let coordinates = locationManager?.location?.coordinate {
             //Так нельзя

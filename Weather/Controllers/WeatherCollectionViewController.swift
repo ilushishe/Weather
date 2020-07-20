@@ -15,7 +15,7 @@ import CoreLocation
 class WeatherCollectionViewController: UIViewController {
     
     //MARK: TEMP Property
-    var isCollectionView = false
+    var isCollectionView = true
     
     //MARK: - Properties
     lazy var  coreDataStack = CoreDataStack(modelName: "Weathers")
@@ -306,7 +306,17 @@ extension WeatherCollectionViewController {
         let session = URLSession.shared
         //let queryItems = [URLQueryItem(name: "key", value: apikey), URLQueryItem(name: "q", value: query)]
         //let q = query.replacingOccurrences(of: ", ", with: ",")
-        guard let url = URL(string: "https://api.weatherapi.com/v1/current.json?key=\(apikey)&q=\(query)") else { return }
+
+        var urlComponents = URLComponents()
+        urlComponents.scheme = "https"
+        urlComponents.host = "api.weatherapi.com"
+        urlComponents.path = "/v1/current.json"
+        urlComponents.queryItems = [
+           URLQueryItem(name: "q", value: query),
+           URLQueryItem(name: "key", value: apikey)
+        ]
+        guard let url = URL(string: urlComponents.url?.absoluteString ?? "") else { return }
+        print(url)
       
 
         let task = session.dataTask(with: url) { [weak self]
@@ -362,6 +372,7 @@ extension WeatherCollectionViewController: ListOfCitiesDelegate {
         weather.cityName = item.cityName
         weather.isCurrentLocation = false
         weather.index = Int16(fetchedResultsController.fetchedObjects?.count ?? 0 + 1)
+        
         coreDataStack.saveContext()
     }
 }

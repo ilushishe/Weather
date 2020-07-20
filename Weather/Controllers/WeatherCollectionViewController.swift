@@ -316,7 +316,6 @@ extension WeatherCollectionViewController {
            URLQueryItem(name: "key", value: apikey)
         ]
         guard let url = URL(string: urlComponents.url?.absoluteString ?? "") else { return }
-        print(url)
       
 
         let task = session.dataTask(with: url) { [weak self]

@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 protocol ListOfCitiesDelegate: class {
-  func didSelect(viewController: ListOfCities, item: City)
+    func didSelect(viewController: ListOfCities, item: City)
 }
 
 class ListOfCities: UIViewController {
@@ -85,7 +85,7 @@ extension ListOfCities: UITableViewDelegate {
 
 //MARK: SearchBarDelegate
 extension ListOfCities: UISearchBarDelegate {
-   
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         print("text did change")
         //add delay
@@ -99,7 +99,7 @@ extension ListOfCities: UISearchBarDelegate {
     
     @objc func finishTyping() {
         fetchCity(query: searchBar.text!)
-
+        
     }
 }
 
@@ -108,7 +108,16 @@ extension ListOfCities {
     func fetchCity (query: String) {
         let apikey = "9d30d2d76ab040a1872223526201905"
         let session = URLSession.shared
-        guard let url = URL(string: "https://api.weatherapi.com/v1/search.json?key=\(apikey)&q=\(query)") else { return }
+        var urlComponents = URLComponents()
+        urlComponents.scheme = "https"
+        urlComponents.host = "api.weatherapi.com"
+        urlComponents.path = "/v1/search.json"
+        urlComponents.queryItems = [
+            URLQueryItem(name: "q", value: query),
+            URLQueryItem(name: "key", value: apikey)
+        ]
+        guard let url = URL(string: urlComponents.url?.absoluteString ?? "") else { return }
+        
         let task = session.dataTask(with: url) { [weak self]
             data, response, error in
             if error != nil {

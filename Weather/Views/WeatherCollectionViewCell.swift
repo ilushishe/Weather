@@ -8,7 +8,7 @@
 
 import UIKit
 
-class WeatherCell: UICollectionViewCell {
+class WeatherCollectionViewCell: UICollectionViewCell {
     
     //MARK: - Properties
     var cityNameLabel: UILabel = {

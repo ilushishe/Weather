@@ -9,8 +9,13 @@
 import Foundation
 import UIKit
 
+protocol ListOfCitiesDelegate: class {
+  func didSelect(viewController: ListOfCities, item: City)
+}
+
 class ListOfCities: UIViewController {
     
+    //MARK: TEMP Properties    
     var cities = [City]() {
         didSet {
             DispatchQueue.main.async {
@@ -38,6 +43,8 @@ class ListOfCities: UIViewController {
         searchBar.delegate = self
         return searchBar
     }()
+    
+    public weak var delegate: ListOfCitiesDelegate?
     
     // MARK: View Lifecycle
     override func viewDidLoad() {
@@ -70,7 +77,10 @@ extension ListOfCities: UITableViewDataSource {
 //MARK: UITableViewDelegate
 
 extension ListOfCities: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        dismiss(animated: true, completion: nil)
+        delegate?.didSelect(viewController: self, item: cities[indexPath.row])
+    }
 }
 
 //MARK: SearchBarDelegate
@@ -89,10 +99,6 @@ extension ListOfCities: UISearchBarDelegate {
     
     @objc func finishTyping() {
         fetchCity(query: searchBar.text!)
-
-    }
-    
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
 
     }
 }
@@ -142,5 +148,4 @@ extension ListOfCities {
         }
     }
 }
-
 

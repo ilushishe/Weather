@@ -10,7 +10,12 @@ import UIKit
 import CoreData
 import CoreLocation
 
+
+
 class WeatherCollectionViewController: UIViewController {
+    
+    //MARK: TEMP Property
+    var isCollectionView = false
     
     //MARK: - Properties
     lazy var  coreDataStack = CoreDataStack(modelName: "Weathers")
@@ -24,11 +29,18 @@ class WeatherCollectionViewController: UIViewController {
     var collectionVIew: UICollectionView! = nil
     //var pageControl: UIPageControl! = nil
     var toolbar: UIToolbar! = nil
+    var tableView: UITableView! = nil
     
     //MARK: - Actions
     @objc func openCitiesList() {
         let listOfCitiesVC = ListOfCities()
+        listOfCitiesVC.delegate = self
         navigationController?.showDetailViewController(listOfCitiesVC, sender: self)
+    }
+    
+    @objc func switchView() {
+        isCollectionView = !isCollectionView
+        setVisibility()
     }
     
     // MARK: View Lifecycle
@@ -46,7 +58,9 @@ private extension WeatherCollectionViewController {
         fetchedResultsController = weatherListFetchedResultsController()
         setupLocationManager()
         setupCollectionView()
+        setupTableView()
         setupToolbar()
+        setVisibility()
     }
     
     func setupCollectionView() {
@@ -58,9 +72,31 @@ private extension WeatherCollectionViewController {
         collectionVIew.backgroundColor = .white
         collectionVIew.delegate = self
         collectionVIew.dataSource = self
-        collectionVIew.register(WeatherCell.self, forCellWithReuseIdentifier: "WeatherCell")
+        collectionVIew.register(WeatherCollectionViewCell.self, forCellWithReuseIdentifier: "WeatherCell")
         collectionVIew.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(collectionVIew)
+    }
+    
+    func setupTableView() {
+        tableView = UITableView(frame: view.frame)
+//        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(CityCell.self, forCellReuseIdentifier: "WeatherTableViewCell")
+        tableView.setEditing(true, animated: true)
+        self.view.addSubview(tableView)
+    }
+    
+    func setVisibility() {
+        if let tv = tableView, let cv = collectionVIew {
+            if isCollectionView {
+                cv.alpha = 1
+                tv.alpha = 0
+            } else {
+                cv.alpha = 0
+                tv.alpha = 1
+            }
+        }
+        
     }
     
     func setupToolbar() {
@@ -72,7 +108,7 @@ private extension WeatherCollectionViewController {
         toolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
         let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(openCitiesList))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let listItem = UIBarButtonItem(barButtonSystemItem: .organize, target: nil, action: nil)
+        let listItem = UIBarButtonItem(barButtonSystemItem: .organize, target: nil, action: #selector(switchView))
         toolbar.setItems([addButton,space, listItem], animated: true)
     }
 }
@@ -129,6 +165,7 @@ extension WeatherCollectionViewController: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         // TODO: переделать ? или норм?
         collectionVIew.reloadData()
+        tableView.reloadData()
     }
 }
 
@@ -145,19 +182,49 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WeatherCell", for: indexPath) as! WeatherCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WeatherCell", for: indexPath) as! WeatherCollectionViewCell
         configureCell(cell, indexPath: indexPath)
         return cell
     }
     
     
-    private func configureCell(_ cell: WeatherCell, indexPath: IndexPath) {
+    private func configureCell(_ cell: WeatherCollectionViewCell, indexPath: IndexPath) {
         let weather = fetchedResultsController.object(at: indexPath)
         if let name = weather.cityName {
             cell.cityNameLabel.text = name
             cell.tempLabel.text = String(weather.temp_c)
         }
       
+    }
+}
+
+//MARK: TableViewDataSource
+extension WeatherCollectionViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+       guard let sectionInfo = fetchedResultsController.sections?[section] else { return 0 }
+        return sectionInfo.numberOfObjects
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "WeatherTableViewCell", for: indexPath)
+        cell.textLabel?.text = fetchedResultsController.object(at: indexPath).cityName
+        return cell
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return fetchedResultsController.sections?.count ?? 0
+        
+    }
+    
+    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        var obj1Index = fetchedResultsController.object(at: sourceIndexPath).index
+        var obj2Index = fetchedResultsController.object(at: destinationIndexPath).index
+        swap(&obj1Index,&obj2Index)
+        coreDataStack.saveContext()
     }
 }
 
@@ -199,6 +266,8 @@ extension WeatherCollectionViewController: CLLocationManagerDelegate {
     }
 }
 
+
+
 //ПОКА РАБОТАЕТ, НО ПОТОМ НАДО ПЕРЕПИСАТЬ
 //MARK: Network services
 extension WeatherCollectionViewController {
@@ -235,7 +304,11 @@ extension WeatherCollectionViewController {
     func updWeatherFromServer (query: String, weather: Weather) {
         let apikey = "9d30d2d76ab040a1872223526201905"
         let session = URLSession.shared
+        //let queryItems = [URLQueryItem(name: "key", value: apikey), URLQueryItem(name: "q", value: query)]
+        //let q = query.replacingOccurrences(of: ", ", with: ",")
         guard let url = URL(string: "https://api.weatherapi.com/v1/current.json?key=\(apikey)&q=\(query)") else { return }
+      
+
         let task = session.dataTask(with: url) { [weak self]
             data, response, error in
             if error != nil {
@@ -282,6 +355,19 @@ extension WeatherCollectionViewController {
         return false
     }
 }
+
+extension WeatherCollectionViewController: ListOfCitiesDelegate {
+    func didSelect(viewController: ListOfCities, item: City) {
+        let weather = Weather(context: coreDataStack.managedContext)
+        weather.cityName = item.cityName
+        weather.isCurrentLocation = false
+        weather.index = Int16(fetchedResultsController.fetchedObjects?.count ?? 0 + 1)
+        coreDataStack.saveContext()
+    }
+}
+
+
+
 
 
 

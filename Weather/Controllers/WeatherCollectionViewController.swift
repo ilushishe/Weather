@@ -61,8 +61,8 @@ private extension WeatherCollectionViewController {
         setupCollectionView()
         setupTableView()
         setupToolbar()
-        setVisibility()
         setupPageControl()
+        setVisibility()
     }
     
     func setupCollectionView() {
@@ -91,12 +91,14 @@ private extension WeatherCollectionViewController {
     }
     
     func setVisibility() {
-        if let tv = tableView, let cv = collectionVIew {
+        if let tv = tableView, let cv = collectionVIew, let pc = pageControl {
             if isCollectionView {
                 cv.alpha = 1
+                pc.alpha = 1
                 tv.alpha = 0
             } else {
                 cv.alpha = 0
+                pc.alpha = 0
                 tv.alpha = 1
             }
         }
@@ -248,9 +250,9 @@ extension WeatherCollectionViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        var obj1Index = fetchedResultsController.object(at: sourceIndexPath).index
-        var obj2Index = fetchedResultsController.object(at: destinationIndexPath).index
-        swap(&obj1Index,&obj2Index)
+        let obj1 = fetchedResultsController.object(at: sourceIndexPath)
+        let obj2 = fetchedResultsController.object(at: destinationIndexPath)
+        swap(&obj1.index,&obj2.index)
         coreDataStack.saveContext()
     }
 }
@@ -331,8 +333,6 @@ extension WeatherCollectionViewController {
     func updWeatherFromServer (query: String, weather: Weather) {
         let apikey = "9d30d2d76ab040a1872223526201905"
         let session = URLSession.shared
-        //let queryItems = [URLQueryItem(name: "key", value: apikey), URLQueryItem(name: "q", value: query)]
-        //let q = query.replacingOccurrences(of: ", ", with: ",")
 
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"

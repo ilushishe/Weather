@@ -66,6 +66,7 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addViewsAndSetConstraints()
+        backgroundColor = .yellow
     }
     
     required init?(coder: NSCoder) {

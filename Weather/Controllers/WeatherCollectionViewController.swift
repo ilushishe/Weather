@@ -20,6 +20,7 @@ class WeatherCollectionViewController: UIViewController {
     //MARK: - Properties
     lazy var  coreDataStack = CoreDataStack(modelName: "Weathers")
     var fetchedResultsController: NSFetchedResultsController<Weather> = NSFetchedResultsController()
+    var currentPage = 0
     
     var locationManager: CLLocationManager?
     var currentLocation: CLLocation?
@@ -27,7 +28,7 @@ class WeatherCollectionViewController: UIViewController {
     //MARK: - UIControls
     //как-то надо переделать
     var collectionVIew: UICollectionView! = nil
-    //var pageControl: UIPageControl! = nil
+    var pageControl: UIPageControl! = nil
     var toolbar: UIToolbar! = nil
     var tableView: UITableView! = nil
     
@@ -61,12 +62,14 @@ private extension WeatherCollectionViewController {
         setupTableView()
         setupToolbar()
         setVisibility()
+        setupPageControl()
     }
     
     func setupCollectionView() {
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         layout.itemSize = CGSize(width: view.frame.width, height: view.frame.height)
+        layout.minimumLineSpacing = CGFloat(0)
         layout.scrollDirection = .horizontal
         collectionVIew = UICollectionView(frame: view.frame, collectionViewLayout: layout)
         collectionVIew.backgroundColor = .white
@@ -74,6 +77,7 @@ private extension WeatherCollectionViewController {
         collectionVIew.dataSource = self
         collectionVIew.register(WeatherCollectionViewCell.self, forCellWithReuseIdentifier: "WeatherCell")
         collectionVIew.translatesAutoresizingMaskIntoConstraints = false
+        collectionVIew.isPagingEnabled = true
         self.view.addSubview(collectionVIew)
     }
     
@@ -106,10 +110,26 @@ private extension WeatherCollectionViewController {
         toolbar.heightAnchor.constraint(equalToConstant: 40).isActive = true
         toolbar.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
         toolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
+        toolbar.setBackgroundImage(UIImage(),
+                                        forToolbarPosition: .any,
+                                        barMetrics: .default)
+        toolbar.setShadowImage(UIImage(), forToolbarPosition: .any)
         let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(openCitiesList))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let listItem = UIBarButtonItem(barButtonSystemItem: .organize, target: nil, action: #selector(switchView))
         toolbar.setItems([addButton,space, listItem], animated: true)
+    }
+    
+    func setupPageControl() {
+        pageControl = UIPageControl()
+        view.addSubview(pageControl)
+        pageControl.translatesAutoresizingMaskIntoConstraints = false
+        pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        pageControl.bottomAnchor.constraint(equalTo: toolbar.topAnchor, constant: 8).isActive = true
+        pageControl.pageIndicatorTintColor = .black
+        pageControl.currentPageIndicatorTintColor = .gray
+        pageControl.numberOfPages = fetchedResultsController.fetchedObjects?.count ?? 0
+        
     }
 }
 
@@ -166,11 +186,12 @@ extension WeatherCollectionViewController: NSFetchedResultsControllerDelegate {
         // TODO: переделать ? или норм?
         collectionVIew.reloadData()
         tableView.reloadData()
+        pageControl.numberOfPages = fetchedResultsController.fetchedObjects?.count ?? 0
     }
 }
 
 // MARK: UICollectionViewDataSource
-extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return fetchedResultsController.sections?.count ?? 0
@@ -192,9 +213,15 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
         let weather = fetchedResultsController.object(at: indexPath)
         if let name = weather.cityName {
             cell.cityNameLabel.text = name
-            cell.tempLabel.text = String(weather.temp_c)
+            cell.tempLabel.text = "\(weather.temp_c)"
         }
       
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        currentPage = Int(scrollView.contentOffset.x / collectionVIew.frame.size.width)
+        pageControl.currentPage = currentPage
+        
     }
 }
 
@@ -351,7 +378,7 @@ extension WeatherCollectionViewController {
                         weather.cityName = cityName
                     }
                     
-                    if let temp = currentObject["temp_c"] as? Float {
+                    if let temp = currentObject["temp_c"] as? Double {
                         weather.temp_c = temp
                         print("распарсили temp")
                     }
@@ -371,8 +398,12 @@ extension WeatherCollectionViewController: ListOfCitiesDelegate {
         weather.cityName = item.cityName
         weather.isCurrentLocation = false
         weather.index = Int16(fetchedResultsController.fetchedObjects?.count ?? 0 + 1)
-        
+        print("index \(weather.index)")
+        updWeatherFromServer(query: weather.cityName ?? "", weather: weather)
         coreDataStack.saveContext()
+        if let index = fetchedResultsController.indexPath(forObject: weather) {
+             collectionVIew.scrollToItem(at: index, at: .right, animated: true)
+         }
     }
 }
 

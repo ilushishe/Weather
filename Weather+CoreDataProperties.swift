@@ -2,7 +2,7 @@
 //  Weather+CoreDataProperties.swift
 //  Weather
 //
-//  Created by Ilya Kozlov on 2020-07-14.
+//  Created by Ilya Kozlov on 2020-07-20.
 //  Copyright © 2020 ilushishe. All rights reserved.
 //
 //
@@ -17,17 +17,17 @@ extension Weather {
         return NSFetchRequest<Weather>(entityName: "Weather")
     }
 
+    @NSManaged public var cityName: String?
+    @NSManaged public var descrtiptionCode: String?
+    @NSManaged public var feels_c: Double
+    @NSManaged public var feels_f: Double
     @NSManaged public var index: Int16
     @NSManaged public var isCurrentLocation: Bool
-    @NSManaged public var cityName: String?
-    @NSManaged public var weatherDescription: String?
-    @NSManaged public var descrtiptionCode: String?
-    @NSManaged public var temp_c: Float
-    @NSManaged public var temp_f: Float
-    @NSManaged public var feels_c: Float
-    @NSManaged public var feels_f: Float
     @NSManaged public var last_updated: Date?
     @NSManaged public var lat: Double
     @NSManaged public var lon: Double
+    @NSManaged public var temp_c: Double
+    @NSManaged public var temp_f: Double
+    @NSManaged public var weatherDescription: String?
 
 }

@@ -85,8 +85,9 @@ private extension WeatherCollectionViewController {
         tableView = UITableView(frame: view.frame)
 //        tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(CityCell.self, forCellReuseIdentifier: "WeatherTableViewCell")
-        tableView.setEditing(true, animated: true)
+        tableView.register(WeatherTableViewCell.self, forCellReuseIdentifier: "WeatherTableViewCell")
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 88
         self.view.addSubview(tableView)
     }
     
@@ -205,19 +206,19 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        //TODO: - Fix !
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WeatherCell", for: indexPath) as! WeatherCollectionViewCell
         configureCell(cell, indexPath: indexPath)
         return cell
     }
     
-    
+    //TODO: - Сделать один метод?
     private func configureCell(_ cell: WeatherCollectionViewCell, indexPath: IndexPath) {
         let weather = fetchedResultsController.object(at: indexPath)
         if let name = weather.cityName {
             cell.cityNameLabel.text = name
             cell.tempLabel.text = "\(weather.temp_c)"
         }
-      
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -235,8 +236,12 @@ extension WeatherCollectionViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "WeatherTableViewCell", for: indexPath)
-        cell.textLabel?.text = fetchedResultsController.object(at: indexPath).cityName
+        //TODO: - Fix !
+        let cell = tableView.dequeueReusableCell(withIdentifier: "WeatherTableViewCell", for: indexPath) as! WeatherTableViewCell
+        let weather = fetchedResultsController.object(at: indexPath)
+        cell.cityNameLabel.text = weather.cityName
+        cell.tempLabel.text = "\(weather.temp_c)"
+        cell.weatherDescriptionLabel.text = "weatherDescription"
         return cell
     }
     
@@ -245,16 +250,14 @@ extension WeatherCollectionViewController: UITableViewDataSource {
         
     }
     
-    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    
     func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         let obj1 = fetchedResultsController.object(at: sourceIndexPath)
         let obj2 = fetchedResultsController.object(at: destinationIndexPath)
         swap(&obj1.index,&obj2.index)
         coreDataStack.saveContext()
     }
+    
+    
 }
 
 //MARK: Location services

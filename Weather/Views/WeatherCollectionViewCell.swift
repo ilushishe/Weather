@@ -62,7 +62,7 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     }()
     
     
-    //MARK:_ Methods
+    //MARK: - Methods
     override init(frame: CGRect) {
         super.init(frame: frame)
         addViewsAndSetConstraints()

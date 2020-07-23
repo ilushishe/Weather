@@ -83,7 +83,7 @@ private extension WeatherCollectionViewController {
     
     func setupTableView() {
         tableView = UITableView(frame: view.frame)
-//        tableView.delegate = self
+        tableView.delegate = self
         tableView.dataSource = self
         tableView.register(WeatherTableViewCell.self, forCellReuseIdentifier: "WeatherTableViewCell")
         tableView.rowHeight = UITableView.automaticDimension
@@ -217,7 +217,12 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
         let weather = fetchedResultsController.object(at: indexPath)
         if let name = weather.cityName {
             cell.cityNameLabel.text = name
-            cell.tempLabel.text = "\(weather.temp_c)"
+            cell.tempLabel.text = "\(weather.temp_c)℃"
+            cell.weatherDescriptionLabel.text = weather.weatherDescription
+            cell.feelsTempLabel.text = "feels like: \(weather.feels_c)"
+            if let code = weather.descrtiptionCode {
+                cell.weatherIcon.image = UIImage(named: code)
+            }
         }
     }
     
@@ -229,7 +234,7 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
 }
 
 //MARK: TableViewDataSource
-extension WeatherCollectionViewController: UITableViewDataSource {
+extension WeatherCollectionViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
        guard let sectionInfo = fetchedResultsController.sections?[section] else { return 0 }
         return sectionInfo.numberOfObjects
@@ -256,6 +261,14 @@ extension WeatherCollectionViewController: UITableViewDataSource {
         swap(&obj1.index,&obj2.index)
         coreDataStack.saveContext()
     }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let object = fetchedResultsController.object(at: indexPath)
+            coreDataStack.managedContext.delete(object)
+        }
+    }
+    
     
     
 }
@@ -377,14 +390,36 @@ extension WeatherCollectionViewController {
             if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                 if let locationObject = json["location"] as? [String: Any], let currentObject = json["current"] as? [String: Any] {
                     if let cityName = locationObject["name"] as? String{
-                        print("Распарсили name")
                         weather.cityName = cityName
                     }
                     
-                    if let temp = currentObject["temp_c"] as? Double {
-                        weather.temp_c = temp
-                        print("распарсили temp")
+                    if let tempC = currentObject["temp_c"] as? Double {
+                        weather.temp_c = tempC
                     }
+                    
+                    if let tempF = currentObject["temp_f"] as? Double {
+                        weather.temp_f = tempF
+                    }
+                    
+                    if let feelslikeTemp = currentObject["feelslike_c"] as? Double {
+                        weather.feels_c = feelslikeTemp
+                    }
+                    
+                    if let conditionObject = currentObject["condition"] as? [String: Any] {
+                        if let description = conditionObject["text"] as? String {
+                            weather.weatherDescription = description
+                        }
+                        if let icon = conditionObject["icon"] as? String {
+                            if let iconUrl = URL(string: icon) {
+                                if icon.contains("day") {
+                                    weather.descrtiptionCode = "d" + iconUrl.lastPathComponent
+                                } else if icon.contains("night") {
+                                    weather.descrtiptionCode = "n" + iconUrl.lastPathComponent 
+                                }
+                            }
+                        }
+                    }
+                    
                     return true
                 }
             }

@@ -13,6 +13,8 @@
 		E8995E1524C5F56800446298 /* WeatherTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8995E1424C5F56800446298 /* WeatherTableViewCell.swift */; };
 		E8995E2824C656A900446298 /* Weather+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8995E2624C656A900446298 /* Weather+CoreDataClass.swift */; };
 		E8995E2924C656A900446298 /* Weather+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8995E2724C656A900446298 /* Weather+CoreDataProperties.swift */; };
+		E8995E2B24C875F000446298 /* WeatherAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8995E2A24C875F000446298 /* WeatherAPI.swift */; };
+		E8995E3624C8C32E00446298 /* day in Resources */ = {isa = PBXBuildFile; fileRef = E8995E3524C8C32D00446298 /* day */; };
 		E8A756B024BD267C00AA224D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A756AF24BD267C00AA224D /* AppDelegate.swift */; };
 		E8A756B224BD267C00AA224D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A756B124BD267C00AA224D /* SceneDelegate.swift */; };
 		E8A756B724BD267C00AA224D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8A756B524BD267C00AA224D /* Main.storyboard */; };
@@ -31,6 +33,8 @@
 		E8995E1424C5F56800446298 /* WeatherTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherTableViewCell.swift; sourceTree = "<group>"; };
 		E8995E2624C656A900446298 /* Weather+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Weather+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		E8995E2724C656A900446298 /* Weather+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Weather+CoreDataProperties.swift"; sourceTree = SOURCE_ROOT; };
+		E8995E2A24C875F000446298 /* WeatherAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAPI.swift; sourceTree = "<group>"; };
+		E8995E3524C8C32D00446298 /* day */ = {isa = PBXFileReference; lastKnownFileType = folder; path = day; sourceTree = "<group>"; };
 		E8A756AC24BD267C00AA224D /* Weather.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Weather.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8A756AF24BD267C00AA224D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E8A756B124BD267C00AA224D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -84,6 +88,7 @@
 				E8A756BA24BD267D00AA224D /* LaunchScreen.storyboard */,
 				E8A756BD24BD267D00AA224D /* Info.plist */,
 				E8A756C324BD26C800AA224D /* Weathers.xcdatamodeld */,
+				E8995E3524C8C32D00446298 /* day */,
 			);
 			path = Weather;
 			sourceTree = "<group>";
@@ -95,6 +100,7 @@
 				E8995E2724C656A900446298 /* Weather+CoreDataProperties.swift */,
 				E8A756CD24BDD9D100AA224D /* CoreDataStack.swift */,
 				E80F887324C2032E002BE036 /* City.swift */,
+				E8995E2A24C875F000446298 /* WeatherAPI.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -177,6 +183,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8A756BC24BD267D00AA224D /* LaunchScreen.storyboard in Resources */,
+				E8995E3624C8C32E00446298 /* day in Resources */,
 				E8A756B924BD267D00AA224D /* Assets.xcassets in Resources */,
 				E8A756B724BD267C00AA224D /* Main.storyboard in Resources */,
 			);
@@ -199,6 +206,7 @@
 				E80F887024C10D15002BE036 /* ListOfCitiesViewController.swift in Sources */,
 				E8995E2924C656A900446298 /* Weather+CoreDataProperties.swift in Sources */,
 				E80F887424C2032E002BE036 /* City.swift in Sources */,
+				E8995E2B24C875F000446298 /* WeatherAPI.swift in Sources */,
 				E8A756B224BD267C00AA224D /* SceneDelegate.swift in Sources */,
 				E8A756D024BDE01100AA224D /* WeatherCollectionViewController.swift in Sources */,
 			);
@@ -347,6 +355,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = PH34QUKL7P;
 				INFOPLIST_FILE = Weather/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -365,6 +374,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = PH34QUKL7P;
 				INFOPLIST_FILE = Weather/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

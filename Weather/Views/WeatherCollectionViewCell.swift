@@ -24,7 +24,7 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     
     var tempLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 106)
+        label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 80)
         label.textColor = .black
         label.text = "-/-"
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -46,7 +46,6 @@ class WeatherCollectionViewCell: UICollectionViewCell {
         let icon = UIImageView()
         icon.translatesAutoresizingMaskIntoConstraints = false
         icon.contentMode = .scaleAspectFill
-        icon.backgroundColor = .brown
         icon.setContentHuggingPriority(.fittingSizeLevel, for: .vertical)
         return icon
     }()
@@ -66,7 +65,6 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addViewsAndSetConstraints()
-        backgroundColor = .yellow
     }
     
     required init?(coder: NSCoder) {

@@ -85,6 +85,9 @@ private extension WeatherCollectionViewController {
         tableView = UITableView(frame: view.frame)
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.dragInteractionEnabled = true
+        tableView.dragDelegate = self
+        tableView.dropDelegate = self
         tableView.register(WeatherTableViewCell.self, forCellReuseIdentifier: "WeatherTableViewCell")
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 88
@@ -233,8 +236,8 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
     }
 }
 
-//MARK: TableViewDataSource
-extension WeatherCollectionViewController: UITableViewDataSource, UITableViewDelegate {
+//MARK: TableViewDataSource and Delegate
+extension WeatherCollectionViewController: UITableViewDataSource, UITableViewDelegate, UITableViewDragDelegate, UITableViewDropDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
        guard let sectionInfo = fetchedResultsController.sections?[section] else { return 0 }
         return sectionInfo.numberOfObjects
@@ -269,7 +272,49 @@ extension WeatherCollectionViewController: UITableViewDataSource, UITableViewDel
         }
     }
     
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        if fetchedResultsController.object(at: indexPath).isCurrentLocation {
+            return false
+        } else {
+            return true
+        }
+    }
     
+    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        if fetchedResultsController.object(at: indexPath).isCurrentLocation {
+            return false
+        } else {
+            return true
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        
+        return [UIDragItem(itemProvider: NSItemProvider())]
+    }
+    
+    func tableView(_ tableView: UITableView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UITableViewDropProposal {
+        
+        if tableView.numberOfSections > 1 {
+            if destinationIndexPath?.section == 0 {
+                return UITableViewDropProposal(operation: .cancel, intent: .unspecified)
+            }
+        }
+        
+        if tableView.numberOfSections == 1 && fetchedResultsController.fetchedObjects?.count == 1 {
+            return UITableViewDropProposal(operation: .cancel, intent: .unspecified)
+        }
+        
+        if session.localDragSession != nil {
+            print("dest \(destinationIndexPath)")
+            return UITableViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
+        }
+        return UITableViewDropProposal(operation: .cancel, intent: .unspecified)
+    }
+    
+    func tableView(_ tableView: UITableView, performDropWith coordinator: UITableViewDropCoordinator) {
+        
+    }
     
 }
 

@@ -31,6 +31,9 @@ class ListOfCities: UIViewController {
         tableView.dataSource = self
         tableView.register(CityCell.self, forCellReuseIdentifier: "CityCell")
         tableView.contentInset = UIEdgeInsets(top: 66, left: 0, bottom: 66, right: 0)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 88
+        tableView.separatorStyle = UITableViewCell.SeparatorStyle.none
         return tableView
     }()
     

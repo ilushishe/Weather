@@ -14,7 +14,7 @@ class CityCell: UITableViewCell {
     
     var cityNameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 20)
+        label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 24)
         label.textColor = .black
         label.text = "-/-"
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -25,7 +25,7 @@ class CityCell: UITableViewCell {
     
     var cityRegionLabel: UILabel = {
            let label = UILabel()
-           label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 14)
+           label.font = UIFont(name: "HelveticaNeue-UltraLight", size: 16)
            label.textColor = .black
            label.text = "-/-"
            label.translatesAutoresizingMaskIntoConstraints = false
@@ -47,11 +47,17 @@ class CityCell: UITableViewCell {
     func addViewsAndSetConstraints() {
         
         addSubview(cityNameLabel)
-        cityNameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
-        cityNameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8).isActive = true
-        
         addSubview(cityRegionLabel)
-        cityRegionLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8).isActive = true
-        cityRegionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8).isActive = true
+
+        cityNameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 4).isActive = true
+        cityNameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 4).isActive = true
+        cityNameLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -4).isActive = true
+
+        
+        cityRegionLabel.topAnchor.constraint(equalTo: cityNameLabel.bottomAnchor, constant: 4).isActive = true
+        cityRegionLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 4).isActive = true
+        cityRegionLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -4).isActive = true
+        cityRegionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4).isActive = true
+        
     }
 }

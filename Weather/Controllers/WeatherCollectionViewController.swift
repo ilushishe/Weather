@@ -21,6 +21,24 @@ class WeatherCollectionViewController: UIViewController {
     lazy var  coreDataStack = CoreDataStack(modelName: "Weathers")
     var fetchedResultsController: NSFetchedResultsController<Weather> = NSFetchedResultsController()
     var currentPage = 0
+    var isCelsius = true
+    
+    var attributedString: NSMutableAttributedString {
+        let blackAttr = [NSAttributedString.Key.foregroundColor: UIColor.black]
+        let greyAttr = [NSAttributedString.Key.foregroundColor: UIColor.gray]
+        let attrString = NSMutableAttributedString()
+        if isCelsius {
+            attrString.append(NSAttributedString(string: "℃", attributes: blackAttr))
+            attrString.append(NSAttributedString(string: " / "))
+            attrString.append(NSAttributedString(string: "℉", attributes: greyAttr))
+        } else {
+            attrString.append(NSAttributedString(string: "℃", attributes: greyAttr))
+            attrString.append(NSAttributedString(string: " / "))
+            attrString.append(NSAttributedString(string: "℉", attributes: blackAttr))
+        }
+            
+        return attrString
+    }
     
     var locationManager: CLLocationManager?
     var currentLocation: CLLocation?
@@ -31,6 +49,8 @@ class WeatherCollectionViewController: UIViewController {
     var pageControl: UIPageControl! = nil
     var toolbar: UIToolbar! = nil
     var tableView: UITableView! = nil
+    let button = UIButton(type: .custom)
+
     
     //MARK: - Actions
     @objc func openCitiesList() {
@@ -42,6 +62,13 @@ class WeatherCollectionViewController: UIViewController {
     @objc func switchView() {
         isCollectionView = !isCollectionView
         setVisibility()
+    }
+    
+    @objc func switchDegree() {
+        isCelsius = !isCelsius
+        button.setAttributedTitle(attributedString, for: .normal)
+        collectionVIew.reloadData()
+        tableView.reloadData()
     }
     
     // MARK: View Lifecycle
@@ -91,6 +118,7 @@ private extension WeatherCollectionViewController {
         tableView.register(WeatherTableViewCell.self, forCellReuseIdentifier: "WeatherTableViewCell")
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 88
+        self.tableView.separatorStyle = UITableViewCell.SeparatorStyle.none
         self.view.addSubview(tableView)
     }
     
@@ -121,9 +149,14 @@ private extension WeatherCollectionViewController {
                                         barMetrics: .default)
         toolbar.setShadowImage(UIImage(), forToolbarPosition: .any)
         let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(openCitiesList))
+        addButton.tintColor = .black
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let listItem = UIBarButtonItem(barButtonSystemItem: .organize, target: nil, action: #selector(switchView))
-        toolbar.setItems([addButton,space, listItem], animated: true)
+        listItem.tintColor = .black
+        button.setAttributedTitle(attributedString, for: .normal)
+        button.addTarget(self, action: #selector(switchDegree), for: .touchUpInside)
+        let degreeSwitcher = UIBarButtonItem(customView: button)
+        toolbar.setItems([addButton,space,degreeSwitcher,space, listItem], animated: true)
     }
     
     func setupPageControl() {
@@ -132,8 +165,8 @@ private extension WeatherCollectionViewController {
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         pageControl.bottomAnchor.constraint(equalTo: toolbar.topAnchor, constant: 8).isActive = true
-        pageControl.pageIndicatorTintColor = .black
-        pageControl.currentPageIndicatorTintColor = .gray
+        pageControl.pageIndicatorTintColor = .gray
+        pageControl.currentPageIndicatorTintColor = .black
         pageControl.numberOfPages = fetchedResultsController.fetchedObjects?.count ?? 0
         
     }
@@ -220,11 +253,17 @@ extension WeatherCollectionViewController: UICollectionViewDelegate, UICollectio
         let weather = fetchedResultsController.object(at: indexPath)
         if let name = weather.cityName {
             cell.cityNameLabel.text = name
-            cell.tempLabel.text = "\(weather.temp_c)℃"
             cell.weatherDescriptionLabel.text = weather.weatherDescription
-            cell.feelsTempLabel.text = "feels like: \(weather.feels_c)"
             if let code = weather.descrtiptionCode {
                 cell.weatherIcon.image = UIImage(named: code)
+            }
+            
+            if isCelsius {
+                cell.tempLabel.text = "\(weather.temp_c)℃"
+                cell.feelsTempLabel.text = "feels like: \(weather.feels_c)"
+            } else {
+                cell.tempLabel.text = "\(weather.temp_f)℉"
+                cell.feelsTempLabel.text = "feels like: \(weather.feels_f)"
             }
         }
     }
@@ -248,8 +287,12 @@ extension WeatherCollectionViewController: UITableViewDataSource, UITableViewDel
         let cell = tableView.dequeueReusableCell(withIdentifier: "WeatherTableViewCell", for: indexPath) as! WeatherTableViewCell
         let weather = fetchedResultsController.object(at: indexPath)
         cell.cityNameLabel.text = weather.cityName
-        cell.tempLabel.text = "\(weather.temp_c)"
-        cell.weatherDescriptionLabel.text = "weatherDescription"
+        cell.weatherDescriptionLabel.text = weather.weatherDescription
+        if isCelsius {
+            cell.tempLabel.text = "\(weather.temp_c) ℃"
+        } else {
+            cell.tempLabel.text = "\(weather.temp_f) ℉"
+        }
         return cell
     }
     
@@ -446,8 +489,11 @@ extension WeatherCollectionViewController {
                         weather.temp_f = tempF
                     }
                     
-                    if let feelslikeTemp = currentObject["feelslike_c"] as? Double {
-                        weather.feels_c = feelslikeTemp
+                    if let feelslikeC = currentObject["feelslike_c"] as? Double {
+                        weather.feels_c = feelslikeC
+                    }
+                    if let feelslikeF = currentObject["feelslike_f"] as? Double {
+                        weather.feels_f = feelslikeF
                     }
                     
                     if let conditionObject = currentObject["condition"] as? [String: Any] {
